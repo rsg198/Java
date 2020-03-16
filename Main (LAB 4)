@@ -1,0 +1,147 @@
+package com.company;
+
+import java.util.*;
+
+public class Main {
+    static Random rand = new Random();
+
+    public static void main(String[] args) {
+        doOptional(10, 4);
+    }
+
+    public static void doOptional(int noResidents, int noHospitals) {
+        ArrayList<Resident> residents = new ArrayList<>();
+        Set<Hospital> hospitals = new Set<>();
+        EntityFactory factory = EntityFactory.getInstance();
+        Comparator<Resident> residentComparator = new Comparator<Resident>() {
+            @Override
+            public int compare(Resident o1, Resident o2) {
+                return o1.getName().compareTo(o2.getName());
+            }
+        };
+        genResidents(noResidents, residents, factory, residentComparator);
+        genHospitals(noResidents, noHospitals, hospitals, factory);
+
+        genResidentPreferences(noResidents, residents, hospitals);
+        genHospitalPreferences(noHospitals, residents, hospitals);
+
+        Map<Hospital, List<Resident>> hospitalPreferencesMap = getHospitalMap(hospitals);
+        Map<Resident, List<Hospital>> residentPreferencesMap = getResidentMap(residents);
+
+        printHospitalsMap(hospitalPreferencesMap);
+        printResidentsMap(residentPreferencesMap);
+
+        final String residentName = "R1";
+        final String[] acceptableHospitalsName = {"H1", "H3"};
+
+        filterAndPrintHospitals(hospitalPreferencesMap, residentName);
+        filterAndPrintResidents(residentPreferencesMap, acceptableHospitalsName);
+    }
+
+    private static void printHospitalsMap(Map<Hospital, List<Resident>> hospitalPreferencesMap) {
+        System.out.println("Hospitals: ");
+        hospitalPreferencesMap
+                .forEach((hospital, residentsPref) -> {
+                    System.out.print(hospital.getName() + ": ");
+                    for (Resident resident : residentsPref) {
+                        System.out.print(resident.getName() + ", ");
+                    }
+                    System.out.print("\n");
+                });
+    }
+
+    private static void printResidentsMap(Map<Resident, List<Hospital>> residentPreferencesMap) {
+        System.out.println("\nResidents: ");
+        residentPreferencesMap
+                .forEach((resident, hospitalsPref) -> {
+                    System.out.print(resident.getName() + ": ");
+                    for (Hospital hospital : hospitalsPref) {
+                        System.out.print(hospital.getName() + ", ");
+                    }
+                    System.out.print("\n");
+                });
+        System.out.print("\n");
+    }
+
+    private static Map<Hospital, List<Resident>> getHospitalMap(Set<Hospital> hospitals) {
+        Map<Hospital, List<Resident>> hospitalPreferencesMap;
+        hospitalPreferencesMap = new TreeMap<>();
+        for (Hospital hospital : hospitals) {
+            hospitalPreferencesMap.put(hospital, hospital.getPreferences());
+        }
+        return hospitalPreferencesMap;
+    }
+
+    private static Map<Resident, List<Hospital>> getResidentMap(ArrayList<Resident> residents) {
+        Map<Resident, List<Hospital>> residentPreferencesMap;
+        residentPreferencesMap = new HashMap<>();
+        for (Resident resident : residents) {
+            residentPreferencesMap.put(resident, resident.getPreferences());
+        }
+        return residentPreferencesMap;
+    }
+
+    private static void filterAndPrintHospitals(Map<Hospital, List<Resident>> hospitalPreferencesMap, String residentName) {
+        System.out.println("Filtered Hospitals: ");
+        hospitalPreferencesMap
+                .entrySet()
+                .stream()
+                .filter(e -> {
+                    Resident resident = e.getValue().get(0);
+                    return resident.getName().equals(residentName);
+                })
+                .forEach(e -> {
+                    System.out.println(e.getKey().getName());
+                });
+    }
+
+    private static void filterAndPrintResidents(Map<Resident, List<Hospital>> residentPreferencesMap, String[] acceptableHospitalsName) {
+        System.out.println("Filtered Residents: ");
+        residentPreferencesMap
+                .entrySet()
+                .stream()
+                .filter(e -> {
+                    for (Hospital hospital : e.getValue()) {
+                        for (String name : acceptableHospitalsName) {
+                            if (hospital.getName().equals(name))
+                                return true;
+                        }
+                    }
+                    return false;
+                })
+                .forEach(e -> {
+                    System.out.println(e.getKey().getName());
+                });
+    }
+
+    private static void genHospitalPreferences(int noHospitals, ArrayList<Resident> residents, Set<Hospital> hospitals) {
+        Object[] hospitalSortedList = hospitals.toArray();
+        residents.forEach(resident -> {
+            int numberOfPreferences = (Math.abs(rand.nextInt()) % (noHospitals - 1)) + 1;
+            for (int i = 0; i < numberOfPreferences; i++) {
+                int choise = Math.abs(rand.nextInt()) % numberOfPreferences;
+                resident.addPreference((Hospital) hospitalSortedList[choise]);
+            }
+        });
+    }
+
+    private static void genResidentPreferences(int noResidents, ArrayList<Resident> residents, Set<Hospital> hospitals) {
+        for (Hospital hospital : hospitals) {
+            for (int i = 0; i < hospital.getCapacity(); i++) {
+                int choise = Math.abs(rand.nextInt()) % noResidents;
+                hospital.addPreference(residents.get(choise));
+            }
+        }
+    }
+
+    private static void genHospitals(int noResidents, int noHospitals, Set<Hospital> hospitals, EntityFactory factory) {
+        factory.genHospitalStream("H", 1, noHospitals, noResidents)
+                .forEach(hospitals::add);
+    }
+
+    private static void genResidents(int noResidents, ArrayList<Resident> residents, EntityFactory factory, Comparator<Resident> residentComparator) {
+        factory.genResidentStream("R", 1, noResidents)
+                .forEach(residents::add);
+        residents.sort(residentComparator);
+    }
+}

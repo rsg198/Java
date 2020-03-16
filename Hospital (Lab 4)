@@ -1,0 +1,54 @@
+package com.company;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class Hospital implements Comparable {
+    private String name;
+    private int capacity;
+    private List<Resident> staff;
+    private List<Resident> preferences;
+
+    public Hospital(String name, int capacity) {
+        this.name = name;
+        this.capacity = capacity;
+        this.preferences = new ArrayList<>();
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getCapacity() {
+        return capacity;
+    }
+
+    public List<Resident> getPreferences() {
+        return preferences;
+    }
+
+    public void addPreference(Resident toAdd) {
+        if (!this.preferences.contains(toAdd)) {
+            this.preferences.add(toAdd);
+        }
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        if (!(o instanceof Hospital))
+            throw new RuntimeException("Hospitals can be compared only with each other");
+
+        final Hospital comparedTo = (Hospital) o;
+        return this.getName().compareTo(comparedTo.getName());
+    }
+
+    @Override
+    public String toString() {
+        return "Hospital{" +
+                "name='" + name + '\'' +
+                ", capacity=" + capacity +
+                ", staff=" + staff +
+                ", preferences=" + preferences +
+                '}';
+    }
+}

@@ -1,0 +1,46 @@
+package com.company;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+public class EntityFactory {
+    private static EntityFactory instance = null;
+    private static Random rand = null;
+
+    public static EntityFactory getInstance() {
+        if (instance == null) {
+            instance = new EntityFactory();
+            rand = new Random();
+        }
+        return instance;
+    }
+
+    public Stream<String> genNameStream(String prefix, int rangeFrom, int rangeTo) {
+        return IntStream
+                .rangeClosed(rangeFrom, rangeTo)
+                .mapToObj(id -> {
+                    return prefix + id;
+                });
+    }
+
+    public Stream<Hospital> genHospitalStream(String prefix, int rangeFrom, int rangeTo, int maxCapacity) {
+        return this.genNameStream(prefix, rangeFrom, rangeTo)
+                .map(name -> {
+                    return new Hospital(name, (Math.abs(rand.nextInt()) % maxCapacity) + 1);
+                });
+    }
+
+    public Stream<Resident> genResidentStream(String prefix, int rangeFrom, int rangeTo) {
+        return this.genNameStream(prefix, rangeFrom, rangeTo)
+                .map(name -> {
+                    return new Resident(name);
+                });
+    }
+
+    public String genName(String prefix, int rangeFrom, int rangeTo)
+    {
+        final int id = (rand.nextInt() % (rangeTo - rangeFrom) + rangeFrom);
+        return prefix + id;
+    }
+}

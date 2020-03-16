@@ -1,0 +1,37 @@
+package com.company;
+
+import java.util.ArrayList;
+
+public class Resident {
+    private String name;
+    private ArrayList<Hospital> preferences;
+    private Hospital assignedTo;
+
+    public Resident(String name) {
+        this.name = name;
+        this.preferences = new ArrayList<>();
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public ArrayList<Hospital> getPreferences() {
+        return preferences;
+    }
+
+    public void addPreference(Hospital hospital)
+    {
+        if(!preferences.contains(hospital))
+            preferences.add(hospital);
+    }
+
+    @Override
+    public String toString() {
+        return "Resident{" +
+                "name='" + name + '\'' +
+                ", preferences=" + preferences +
+                ", assignedTo=" + assignedTo +
+                '}';
+    }
+}
